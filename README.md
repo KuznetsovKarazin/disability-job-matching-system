@@ -80,6 +80,17 @@ This system represents an innovative solution to optimize the targeted placement
 
 ---
 
+## 📦 Full Project Download
+
+Due to GitHub's file size limitations, the full version of this project (including trained models and processed datasets) is hosted on Google Drive:
+
+🔗 [Download full project](https://drive.google.com/drive/folders/1enRW6lo01i9sa_MusBluoUWymXIn01Vs?usp=sharing)
+
+This includes:
+- Pre-trained `.joblib` model files
+- Processed `.csv` training datasets
+- Additional evaluation results
+
 ## 🚀 Quick Start
 
 ### 1. Installation
@@ -456,7 +467,7 @@ italian_language:
 - **[User Guide (English)](docs/user_guide_en.md)** or **[User Guide (Italian)](docs/user_guide_it.md)** - Complete operational manual for CPI/SIL staff
 - **[Technical Documentation (English)](docs/technical_docs_en.md)** or **[Technical Documentation (Italian)](docs/technical_docs_it.md)** - Implementation details, algorithms, and architecture
 - **[Deployment Guide (English)](docs/deployment_guide_en.md)** or **[Deployment Guide (Italian)](docs/deployment_guide_it.md)** - Production setup with real data integration
-- **[API Reference (English)](api_reference_en.md)** or **[API Reference (Italian)](api_reference_it.md)** - Code documentation and module specifications
+- **[API Reference (English)](docs/api_reference_en.md)** or **[API Reference (Italian)](docs/api_reference_it.md)** - Code documentation and module specifications
 
 ### Expert Validation Results
 - **🏛️ Employment Center of Villafranca di Verona** - Process validation and workflow approval

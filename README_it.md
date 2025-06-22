@@ -80,6 +80,17 @@ Questo sistema rappresenta una soluzione innovativa per ottimizzare il processo 
 
 ---
 
+## 📦 Scarica il progetto completo
+
+A causa delle limitazioni di dimensione di GitHub, la versione completa del progetto (inclusi i modelli addestrati e i dataset elaborati) è disponibile su Google Drive:
+
+🔗 [Scarica il progetto completo](https://drive.google.com/drive/folders/1enRW6lo01i9sa_MusBluoUWymXIn01Vs?usp=sharing)
+
+Contiene:
+- File `.joblib` dei modelli già addestrati
+- Dataset `.csv` pre-elaborati per l'addestramento
+- Risultati di valutazione aggiuntivi
+
 ## 🚀 Avvio Rapido
 
 ### 1. Installazione
@@ -456,7 +467,7 @@ italian_language:
 - **[Guida Utente (English)](docs/user_guide_en.md)** o **[Guida Utente (Italian)](docs/user_guide_it.md)** - Manuale operativo completo per personale CPI/SIL
 - **[Documentazione Tecnica (English)](docs/technical_docs_en.md)** o **[Documentazione Tecnica (Italian)](docs/technical_docs_it.md)** - Dettagli implementazione, algoritmi e architettura
 - **[Guida Deployment (English)](docs/deployment_guide_en.md)** o **[Guida Deployment (Italian)](docs/deployment_guide_it.md)** - Setup produzione con integrazione dati reali
-- **[Riferimenti API (English)](api_reference_en.md)** o **[Riferimenti API (Italian)](api_reference_it.md)** - Documentazione codice e specifiche moduli
+- **[Riferimenti API (English)](docs/api_reference_en.md)** o **[Riferimenti API (Italian)](docs/api_reference_it.md)** - Documentazione codice e specifiche moduli
 
 ### Risultati Validazione Esperta
 - **🏛️ Centro per l'Impiego di Villafranca di Verona** - Validazione processi e approvazione workflow
