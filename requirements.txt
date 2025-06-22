@@ -1,0 +1,43 @@
+# Core ML/Data Science
+pandas==2.3.0
+numpy==2.3.0
+scikit-learn==1.6.1
+scipy==1.15.3
+imbalanced-learn==0.13.0
+joblib==1.5.1
+
+# Advanced ML
+xgboost==3.0.2
+lightgbm==4.6.0
+optuna==4.4.0
+
+# Visualization
+matplotlib==3.10.3
+seaborn==0.13.2
+plotly==6.1.2
+
+# Streamlit & Web
+streamlit==1.46.0
+altair==5.5.0
+
+# Geocoding & Geography
+geopy==2.4.1
+geographiclib==2.0
+
+# Configuration & Utilities
+PyYAML==6.0.2
+python-dateutil==2.9.0.post0
+
+# System monitoring
+psutil==7.0.0
+
+# File I/O
+pyarrow==20.0.0
+
+# Progress bars
+tqdm==4.67.1
+
+# REMOVED (not needed for core functionality):
+# keyboard==0.13.5 - не используется
+# MouseInfo, PyAutoGUI, pynput - GUI automation не нужен
+# GitPython, alembic, SQLAlchemy - не используется в проекте

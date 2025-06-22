@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+.env
+
+# Data files (exclude large datasets)
+data/processed/Enhanced_Training_Dataset.csv
+*.csv
+
+# Models (too large for git)
+results/*.joblib
+results/*.pkl
+
+# Logs
+logs/
+*.log
+
+# Cache files
+*.cache
+data/processed/geocoding_cache.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Temporary files
+*.tmp
+*.temp

@@ -1,0 +1,47 @@
+# Enhanced Configuration for Disability Job Matching System
+project:
+  name: "Disability Job Matching System"
+  version: "1.0.0"
+  author: "Michele Melchiori"
+  supervisor: "Prof. Oleksandr Kuznetsov"
+
+paths:
+  raw_candidates: "data/raw/Dataset_Candidati_Aggiornato.csv"
+  raw_companies: "data/raw/Dataset_Aziende_con_Stima_Assunzioni.csv"
+  processed_candidates: "data/processed/Dataset_Candidati_Aggiornato_Extended.csv"
+  processed_companies: "data/processed/Dataset_Aziende_con_Stima_Assunzioni_Extended.csv"
+  training_dataset: "data/processed/Enhanced_Training_Dataset.csv"
+  model_output_dir: "results"
+  logs_dir: "logs"
+
+geocoding:
+  delay: 0.5
+  timeout: 10
+  user_agent: "disability-job-matcher-v1.0"
+  cache_file: "data/processed/geocoding_cache.json"
+
+matching_thresholds:
+  attitude_min: 0.3
+  compatibility_min: 0.5
+  distance_max_km: 40
+  match_probability_cutoff: 0.6
+
+model_training:
+  random_state: 42
+  test_size: 0.2
+  cv_folds: 3
+  optuna_trials: 50
+  n_jobs: 4
+  feature_selection_k: 50
+
+streamlit:
+  page_title: "Sistema Collocamento Mirato"
+  page_icon: "🎯"
+  layout: "wide"
+  default_top_k: 5
+
+italian_language:
+  stop_words: ["di", "a", "da", "in", "con", "su", "per", "tra", "fra", 
+               "il", "lo", "la", "i", "gli", "le", "un", "una", "uno",
+               "e", "o", "ma", "se", "che", "chi", "cui", "come", "quando"]
+  token_pattern: "\\b[a-zA-Zàèéìòù]+\\b"
