@@ -57,81 +57,124 @@ The platform comprises three layers:
 
 ### Diagram
 ```mermaid
-flowchart LR
-    subgraph CPI/SIL Nodes
-      A[Regional Data CSVs] --> P1[Preprocess & Feature Engineering]
-      P1 --> M1[Local Model (LightGBM/MLP)]
-      M1 --> U1[Model Update ΔW]
-      U1 --> S1[Shamir Secret Shares]
-      S1 --> E1[Encrypted ΔW_i]
+flowchart TD
+    subgraph "Phase 1: Centralized ML System"
+        A[Raw CSV Data] --> B[Feature Engineering]
+        B --> C[Synthetic Training Dataset]
+        C --> D[Parallel ML Training]
+        D --> E[7-Model Ensemble]
+        E --> F[Streamlit Interface]
+        G[Real-time Candidate Input] --> F
+        F --> H[Ranked Company Recommendations]
+        
+        I[Real Employment Data] -.-> C
+        I -.-> J[Production Training Dataset]
+        J -.-> D
+        
+        style C fill:#fff2cc
+        style E fill:#d5e8d4
+        style I fill:#e1f5fe
+        style J fill:#e8f5e8
     end
+    
+    H ==>|"Evolution to<br/>Federated System"| A2
+    
+    subgraph "Phase 2: Federated Learning System"
+        subgraph "CPI/SIL Nodes"
+            A2[Regional Data CSVs] --> P1["Preprocess & Feature Engineering"]
+            P1 --> M1["Local Model (LightGBM/MLP)"]
+            M1 --> U1["Model Update ΔW"]
+            U1 --> S1[Shamir Secret Shares]
+            S1 --> E1["Encrypted ΔW_i"]
+        end
 
-    E1 -->|network| AGG[Secure Aggregator]
-    AGG -->|FedAvg / Trimmed Mean / Coord Median| G[Global Model]
-    G -->|broadcast| M1
+        subgraph "Privacy Layer"
+            C1["DP: Clip + Noise"] --> AGG
+            S1 -. thresholds .- R1["3-of-5 recovery"]
+        end   
 
-    subgraph Privacy Layer
-      S1 -. thresholds .- R1(3-of-5 recovery)
-      C1[DP: Clip + Noise (RDP accounting)] --> AGG
+        E1 -->|network| AGG[Secure Aggregator]
+      
+        
+        AGG -->|"FedAvg / Trimmed Mean"| GM[Global Model]
+        GM -->|broadcast| M1
+        
+        subgraph "Blockchain Anchoring"
+            GM --> R["Results & Manifests"]
+            R --> HM[Merkle Tree]
+            HM --> Z["Proofs O(log n)"]
+            Z --> BC["Blockchain Anchor"]
+        end
+        
+        style AGG fill:#fdf6e3,stroke:#555,stroke-width:1px
+        style GM fill:#f0fff4,stroke:#555,stroke-width:1px
     end
-
-    subgraph Anchoring
-      R[Results & Model Manifests] --> H[Merkle Tree]
-      H --> Z[Proofs O(log n)]
-      Z --> BC[(Blockchain Anchor)]
-    end
-
-    style AGG fill:#fdf6e3,stroke:#555,stroke-width:1px
-    style G fill:#f0fff4,stroke:#555,stroke-width:1px
 ```
 
 ## Project Structure
 ```
-.
-├── README.md
-├── README_it.md
-├── requirements.txt
-├── config.yaml
-├── streamlit_app.py
-├── data/
-│   ├── raw/
+📁 Disability Job Matching System/
+├── 📄 README.md                               # This file (English)
+├── 📄 README_IT.md                            # Italian version
+├── ⚙️ config.yaml                             # System configuration
+├── 📄 requirements.txt                        # Python dependencies
+├── 🐍 streamlit_app.py                        # 🎯 MAIN APPLICATION
+│
+├── 📁 data/
+│   ├── 📁 raw/                                # Original input data
 │   │   ├── Dataset_Candidati_Aggiornato.csv
 │   │   └── Dataset_Aziende_con_Stima_Assunzioni.csv
-│   └── processed/
-│       └── Enhanced_Training_Dataset.csv
-├── scripts/
-│   ├── 01_generate_dataset.py
-│   ├── 02_visualize_dataset.py
-│   ├── 03_train_models.py
-│   ├── 04_analyze_results.py
-│   ├── 05_LightGBM_federated_training.py
-│   ├── 06_LightGBM_federated_visualization.py
-│   ├── 07_mlp_federated_training.py
-│   ├── 08_mlp_federated_privacy.py
-│   ├── 09_mlp_federated_privacy_visualization.py
-│   └── 10_blockchain_anchoring_bench.py
-├── utils/
-│   ├── enhanced_shamir_privacy.py
-│   ├── federated_learning.py
-│   ├── federated_data_splitter.py
-│   ├── feature_engineering.py
-│   ├── scoring.py
-│   ├── parallel_training.py
-│   └── visualization.py
-├── results/
-│   ├── merged_model_summary.csv
-│   ├── federated/
-│   ├── privacy/
-│   └── anchoring_bench/
-└── docs/
-    ├── user_guide_en.md
-    ├── user_guide_it.md
-    ├── technical_docs_en.md
-    ├── technical_docs_it.md
-    ├── deployment_guide_en.md
-    ├── deployment_guide_it.md
-    ├── api_reference_en.md
-    └── api_reference_it.md
+│   └── 📁 processed/                          # Generated/extended datasets
+│       ├── Dataset_Candidati_Aggiornato_Extended.csv
+│       ├── Dataset_Aziende_con_Stima_Assunzioni_Extended.csv
+│       └── Enhanced_Training_Dataset.csv      # 📊 ML TRAINING DATA
+│
+├── 📁 scripts/                                # Data processing pipeline
+│   ├── 01_generate_dataset.py                 # Data extension + synthetic training generation
+│   ├── 02_visualize_dataset.py                # Data analysis and visualization
+│   ├── 03_train_models.py                     # 🤖 ML MODEL TRAINING
+│   ├── 04_analyze_results.py                  # Performance analysis and reporting
+│   ├── 05_LightGBM_federated_training.py      # 🔬 FEDERATED LEARNING PIPELINE (LightGBM)
+│   ├── 06_LightGBM_federated_visualization.py # 📊 FEDERATED RESULTS VISUALIZATION
+│   ├── 07_mlp_federated_training.py           # 🔄 CLASSICAL FEDERATED LEARNING
+│   ├── 08_mlp_federated_privacy.py            # 🔐 PRIVACY-PRESERVING FEDERATED
+│   ├── 09_mlp_federated_privacy_visualization.py # 📊 FEDERATED RESULTS COMPARISON
+│   ├── blockchain_data_anchoring.py           # ⛓️ BLOCKCHAIN DATA INTEGRITY PIPELINE
+│   └── 10_blockchain_anchoring_bench.py       # 📈 BLOCKCHAIN PERFORMANCE BENCHMARKS
+│
+├── 📁 utils/                                  # Core business logic
+│   ├── __init__.py
+│   ├── feature_engineering.py                 # Data augmentation utilities
+│   ├── scoring.py                            # 🎯 MATCHING ALGORITHM CORE
+│   ├── parallel_training.py                  # ⚡ MULTI-THREADED ML TRAINING
+│   ├── visualization.py                      # Chart generation utilities
+│   └── enhanced_shamir_privacy.py            # 🔒 SHAMIR SECRET SHARING + DIFFERENTIAL
+│
+├── 📁 results/                                # Training outputs
+│   ├── 📁 learning_curves/                   # Training progression charts
+│   ├── 🤖 *.joblib                          # Trained ML models (7 models)
+│   ├── 📊 merged_model_summary.csv          # Performance metrics
+│   └── 📈 *.png                              # Analysis visualizations
+│
+├── 📁 results_LightGBM_federated/            # Federated learning results (LightGBM)
+│   ├── 📁 regional_models/                   # Individual regional models
+│   ├── 📁 federated_models/                  # Aggregated global models
+│   ├── 📁 centralized_models/                # Baseline centralized models
+│   ├── 📁 visualizations/                    # Analysis charts and graphs
+│   ├── 📊 complete_model_comparison.csv      # Three-way performance comparison
+│   └── 📋 experiment_metadata.json           # Complete experimental metadata
+│
+├── 📁 results_mlp_federated/                 # Classical federated learning results
+├── 📁 results_mlp_federated_privacy/         # Privacy-preserving federated results
+├── 📁 results_blockchain_demo/               # Blockchain anchoring demonstrations
+├── 📁 visualizations_federated_comparison/   # Federated learning comparison charts
+│
+└── 📁 docs/                                  # Documentation
+    ├── user_guide_italiano.md                # Operator manual (Italian)
+    ├── technical_documentation.md            # Developer documentation
+    ├── deployment_guide.md                   # Production setup guide
+    ├── api_reference.md                      # Code documentation
+    └── demo_example.pdf                      # Interface usage example
 ```
 
 ## Installation
