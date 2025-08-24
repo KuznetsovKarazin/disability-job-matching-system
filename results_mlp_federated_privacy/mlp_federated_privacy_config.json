@@ -1,0 +1,113 @@
+{
+  "mlp_config": {
+    "hidden_layer_sizes": [
+      128,
+      64
+    ],
+    "activation": "relu",
+    "solver": "sgd",
+    "alpha": 0.01,
+    "batch_size": 256,
+    "learning_rate": "adaptive",
+    "learning_rate_init": 0.001,
+    "momentum": 0.9,
+    "nesterovs_momentum": true,
+    "max_iter": 100,
+    "early_stopping": false,
+    "random_state": 42
+  },
+  "federated_config": {
+    "num_rounds": 30,
+    "local_epochs": 5,
+    "local_batch_size": 256,
+    "validation_split": 0.15,
+    "early_stopping_patience": 3,
+    "validation_check_frequency": 2,
+    "aggregation_method": "fedavg",
+    "trimmed_mean_ratio": 0.1,
+    "privacy_mode": "secure_agg_dp",
+    "dropout_rate": 0.0,
+    "dropout_test_rounds": [
+      10,
+      15
+    ],
+    "log_delta_norms": true,
+    "seed": 42
+  },
+  "privacy_config": {
+    "shamir": {
+      "threshold": 3,
+      "prime_bits": 61,
+      "precision_factor": 1000000,
+      "enable_vectorization": true,
+      "max_clamp_ratio": 0.05
+    },
+    "differential_privacy": {
+      "epsilon_total": 1.0,
+      "delta": 1e-06,
+      "l2_clip_norm": 1.0,
+      "dp_strict": false,
+      "dp_over_noise": false
+    }
+  },
+  "experiment_timestamp": "2025-08-22 00:23:29",
+  "privacy_enabled": true,
+  "privacy_available": true,
+  "critical_fixes_applied": {
+    "double_dp_noise_prevention": "Added apply_dp=False flag to prevent double DP noise application",
+    "per_parameter_seed_shares": "Fixed seed shares storage per parameter for correct dropout recovery",
+    "proper_dp_ordering": "Fixed DP clipping before FedAvg weighting for correct sensitivity",
+    "enhanced_delta_logging": "Added delta norm logging for DP calibration tuning",
+    "snr_sanity_checks": "Added SNR verification for major layers",
+    "no_noise_overscaling": "Fixed strict DP mode without \u221an over-noising",
+    "correct_sys_path": "Fixed sys.path to project root for utils import",
+    "deterministic_seeding": "SHA256-based seeds for true reproducibility",
+    "proper_fillna_order": "Only global medians, no zero pollution",
+    "correct_region_weight_logging": "Proper alignment of regions and weights",
+    "truly_balanced_warmup": "Uses minimum class count for true balance",
+    "weighted_roc_auc_nan_handling": "Re-normalizes weights for non-NaN values",
+    "deterministic_template_selection": "Alphabetically first region for template"
+  },
+  "production_optimizations": {
+    "safe_parameter_handling": "Only modify coefs_/intercepts_, no internal attributes",
+    "proper_batch_processing": "Complete batch coverage with epoch shuffling",
+    "multiple_aggregation_methods": [
+      "fedavg",
+      "fedavg_equal",
+      "coordinate_median",
+      "trimmed_mean"
+    ],
+    "robust_preprocessing": "Graceful column handling and consistent imputation",
+    "smote_fallback": "RandomOverSampler fallback for edge cases",
+    "enhanced_error_handling": "Safe metrics calculation with zero_division guards",
+    "auto_discovery": "Automatic region detection from filesystem",
+    "weighted_metrics": "Both unweighted and weighted averages",
+    "sgd_optimization": "Explicit momentum and Nesterov acceleration",
+    "oversampling_logging": "Track minority ratios before/after oversampling",
+    "dropout_testing": "Configurable client dropout simulation for testing",
+    "delta_norm_logging": "L2 norm tracking for DP calibration"
+  },
+  "privacy_features": {
+    "shamir_secret_sharing": "Secure aggregation with dropout recovery",
+    "differential_privacy": "RDP-based composition with per-layer calibration",
+    "client_side_weighting": "FedAvg weights applied after DP for correct sensitivity",
+    "per_layer_dp_calibration": "Optimized SNR for each parameter layer",
+    "secure_seed_management": "Cryptographic pairwise seed derivation",
+    "dropout_recovery": "Hanging mask removal via Shamir reconstruction",
+    "configurable_privacy_mode": "Toggle between secure_agg_dp and classical",
+    "per_parameter_seed_storage": "FIXED: Separate seed shares per parameter",
+    "double_dp_prevention": "CRITICAL FIX: Single DP application per parameter"
+  },
+  "privacy_infrastructure": {
+    "shamir_threshold": 3,
+    "shamir_participants": 5,
+    "dp_epsilon_total": 1.0,
+    "dp_delta": 1e-06,
+    "dp_noise_multiplier": 0.03234796886137426,
+    "dp_strict_mode": false,
+    "dp_over_noise_mode": false,
+    "num_rounds": 30,
+    "num_clients": 5,
+    "double_dp_prevention_enabled": true
+  }
+}

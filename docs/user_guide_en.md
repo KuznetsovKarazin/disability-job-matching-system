@@ -1,4 +1,364 @@
-# 🎯 User Guide - Disability Job Matching System
+# User Guide — Disability Job Matching System
+_Last updated: 2025-08-24 09:37_
+
+> This guide is written for **operators** (CPI/SIL), **analysts**, and **developers**.
+> It covers workflows, UI operations, dataset preparation, federated learning, privacy controls,
+> blockchain anchoring, troubleshooting, and best practices.
+
+**Related documents**: `README.md`, `technical_documentation.md`, `deployment_guide.md`, `api_reference.md`.
+
+
+## Table of Contents
+1. Introduction
+2. UI Tour
+3. Data Preparation & Contracts
+4. Running the System
+5. Federated Learning Workflows
+6. Privacy & Security (Operator View)
+7. Blockchain Anchoring (Operator View)
+8. Results, Reports & Visualizations
+9. Troubleshooting
+10. FAQ
+11. Glossary
+12. Support & Contacts
+13. Appendix A — CLI Reference
+14. Appendix B — `config.yaml` Reference
+15. Appendix C — Results Directory Map
+16. Appendix D — Embedded Previous Guide (verbatim)
+
+## 1. Introduction
+
+The Disability Job Matching System helps public employment services (CPI/SIL) match candidates with inclusive jobs.
+It supports both **centralized** and **federated** training, and includes **privacy‑preserving** capabilities and **data integrity anchoring**.
+
+**Key concepts**
+- Centralized training with `data/processed/Enhanced_Training_Dataset.csv`.
+- Federated learning across regions without sharing raw data.
+- Privacy modes: secure aggregation (Shamir) and Differential Privacy (RDP‑based).
+- Anchoring: Merkle commitments + proofs for long‑term integrity.
+
+**Roles**
+- Operator: runs matches, reviews recommendations, generates reports.
+- Analyst: validates datasets, monitors metrics, compares models.
+- Developer: maintains pipelines, optimizes models, configures deployments.
+
+## 2. UI Tour
+
+Launch:
+```bash
+streamlit run streamlit_app.py
+```
+
+**Home**
+- KPIs (candidates, companies, regions), quick links.
+
+**Matching**
+- Inputs: radius (default 30 km), candidate/company filters.
+- Outputs: ranked matches (compatibility, distance, readiness).
+- Exports: CSV/PNG.
+
+**Model Comparison**
+- Centralized vs Regional vs Federated; F1/ROC‑AUC; calibration; confusion matrices.
+
+**Privacy Dashboard**
+- Toggle privacy mode; view (ε, δ) per round; secure aggregation status.
+
+**Integrity**
+- Last anchoring run, proofs, verification; trigger new anchoring.
+
+## 3. Data Preparation & Contracts
+
+**Raw (`data/raw/`)**
+- Dataset_Candidati_Aggiornato.csv
+- Dataset_Aziende_con_Stima_Assunzioni.csv
+
+**Processed (`data/processed/`)**
+- Dataset_Candidati_Aggiornato_Extended.csv
+- Dataset_Aziende_con_Stima_Assunzioni_Extended.csv
+- Enhanced_Training_Dataset.csv  # canonical training table
+
+Recommendations:
+- Keep schemas consistent across regions.
+- Document changes in `SCHEMA.md`; update `01_generate_dataset.py`.
+- Validate geocoding; align with `ui.distance_max_km` (30 km).
+
+## 4. Running the System
+
+**Centralized**
+```bash
+python scripts/03_train_models.py --config config.yaml
+python scripts/04_analyze_results.py
+```
+
+**LightGBM Federated (regional → ensemble)**
+```bash
+python scripts/05_LightGBM_federated_training.py
+python scripts/06_LightGBM_federated_visualization.py
+```
+
+**MLP Federated (standard + privacy)**
+```bash
+python scripts/07_mlp_federated_training.py --aggregator fedavg
+python scripts/08_mlp_federated_privacy.py --dp.epsilon 1.0 --secure_agg.threshold 3-of-5
+python scripts/09_mlp_federated_privacy_visualization.py
+```
+
+**Anchoring**
+```bash
+python scripts/blockchain_data_anchoring.py
+python scripts/10_blockchain_anchoring_bench.py
+```
+
+## 5. Federated Learning Workflows
+
+### 5.1 LightGBM (regional ensembling)
+- Train per‑region models; combine via weighted ensemble (weight ∝ sample count).
+```bash
+python scripts/05_LightGBM_federated_training.py
+python scripts/06_LightGBM_federated_visualization.py
+```
+
+### 5.2 MLP (true FedAvg)
+**Aggregator: fedavg**
+```bash
+python scripts/07_mlp_federated_training.py --aggregator fedavg --rounds 10 --batch_size 256
+```
+**Aggregator: trimmed_mean**
+```bash
+python scripts/07_mlp_federated_training.py --aggregator trimmed_mean --rounds 10 --batch_size 256
+```
+**Aggregator: coordinate_median**
+```bash
+python scripts/07_mlp_federated_training.py --aggregator coordinate_median --rounds 10 --batch_size 256
+```
+
+### 5.3 Privacy‑preserving FL (Shamir + DP)
+**DP ε=0.5, δ=1e-6 (RDP)**
+```bash
+python scripts/08_mlp_federated_privacy.py --dp.epsilon 0.5 --dp.delta 1e-6 --secure_agg.threshold 3-of-5
+```
+**DP ε=1.0, δ=1e-6 (RDP)**
+```bash
+python scripts/08_mlp_federated_privacy.py --dp.epsilon 1.0 --dp.delta 1e-6 --secure_agg.threshold 3-of-5
+```
+**DP ε=2.0, δ=1e-6 (RDP)**
+```bash
+python scripts/08_mlp_federated_privacy.py --dp.epsilon 2.0 --dp.delta 1e-6 --secure_agg.threshold 3-of-5
+```
+
+## 6. Privacy & Security (Operator View)
+
+**Secure Aggregation**
+- Shamir (e.g., 3‑of‑5), per‑parameter masking, dropout recovery.
+- Deterministic seeds for reproducibility.
+
+**Differential Privacy**
+- Per‑round clipping and single Gaussian noise injection.
+- RDP accounting exposes cumulative (ε, δ).
+
+**Checklist**
+- Raw data never leave regional nodes.
+- Protect `results_mlp_federated_privacy/`.
+- Rotate access to `data/` and `results/`.
+
+## 7. Blockchain Anchoring (Operator View)
+
+**Purpose**
+- Integrity proofs (Merkle commitments + inclusion proofs) for models and reports.
+
+**Run**
+```bash
+python scripts/blockchain_data_anchoring.py
+python scripts/10_blockchain_anchoring_bench.py
+```
+
+**Outputs**
+- Manifests, proofs, verification logs in `results_blockchain_demo/`.
+
+## 8. Results, Reports & Visualizations
+
+- `results/`: centralized artifacts (`*.joblib`), `learning_curves/`, `*.png`, `merged_model_summary.csv`.
+- `results_LightGBM_federated/`: regional/federated/centralized LightGBM artifacts + `complete_model_comparison.csv`.
+- `results_mlp_federated/`, `results_mlp_federated_privacy/`: MLP FL outputs and privacy logs.
+- `visualizations_federated_comparison/`: comparative charts.
+- `results_blockchain_demo/`: anchoring artifacts.
+
+Interpretation:
+- Use F1/ROC‑AUC; compare Centralized vs Regional vs Federated.
+- Under DP, minor trade‑off on F1 expected; tune ε/rounds/aggregator.
+
+## 9. Troubleshooting
+
+- Missing modules → `pip install -r requirements.txt`
+- scikit‑learn `_safe_tags` error → pin versions with `imbalanced-learn`
+- Docker health check → ensure `curl`, verify `/_stcore/health`
+- Empty comparisons → confirm result folders & CSV paths
+
+## 10. FAQ
+
+**Use without data sharing?** Yes — MLP FL.
+**Default radius?** 30 km (`config.yaml`).
+**DP performance impact?** Slight F1 drop; tune ε/rounds/aggregator.
+**Integrity months later?** Verify with proofs in `results_blockchain_demo/`.
+**GPUs?** Not required; CPU‑friendly.
+
+## 11. Glossary
+
+CPI/SIL, Federated Learning, Secure Aggregation, Differential Privacy (RDP), Merkle Tree.
+
+## 12. Support & Contacts
+
+CPI Villafranca di Verona • SIL Veneto • Università eCampus
+
+## 13. Appendix A — CLI Reference
+### 01_generate_dataset.py
+Common options:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Example:
+```bash
+python scripts/01_generate_dataset.py --config config.yaml
+```
+### 02_visualize_dataset.py
+Common options:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Example:
+```bash
+python scripts/02_visualize_dataset.py --config config.yaml
+```
+### 03_train_models.py
+Common options:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Example:
+```bash
+python scripts/03_train_models.py --config config.yaml
+```
+### 04_analyze_results.py
+Common options:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Example:
+```bash
+python scripts/04_analyze_results.py --config config.yaml
+```
+### 05_LightGBM_federated_training.py
+Common options:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Example:
+```bash
+python scripts/05_LightGBM_federated_training.py --config config.yaml
+```
+### 06_LightGBM_federated_visualization.py
+Common options:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Example:
+```bash
+python scripts/06_LightGBM_federated_visualization.py --config config.yaml
+```
+### 07_mlp_federated_training.py
+Common options:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Example:
+```bash
+python scripts/07_mlp_federated_training.py --config config.yaml
+```
+### 08_mlp_federated_privacy.py
+Common options:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Example:
+```bash
+python scripts/08_mlp_federated_privacy.py --config config.yaml
+```
+### 09_mlp_federated_privacy_visualization.py
+Common options:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Example:
+```bash
+python scripts/09_mlp_federated_privacy_visualization.py --config config.yaml
+```
+### blockchain_data_anchoring.py
+Common options:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Example:
+```bash
+python scripts/blockchain_data_anchoring.py --config config.yaml
+```
+### 10_blockchain_anchoring_bench.py
+Common options:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Example:
+```bash
+python scripts/10_blockchain_anchoring_bench.py --config config.yaml
+```
+
+## 14. Appendix B — `config.yaml` Reference
+
+See README for a full example. Key fields: `paths.*`, `ui.distance_max_km`, `training.*`, `federated.*`, `privacy.*`, `anchoring.*`.
+
+## 15. Appendix C — Results Directory Map
+
+- `results/` — centralized models & plots
+- `results_LightGBM_federated/` — LightGBM federated artifacts
+- `results_mlp_federated/`, `results_mlp_federated_privacy/` — MLP federated outputs
+- `results_blockchain_demo/` — anchoring
+- `visualizations_federated_comparison/` — comparative charts
+
+## 16. Appendix D — Embedded Previous Guide (verbatim)
+
+    # 🎯 User Guide - Disability Job Matching System
 
 **Complete Operational Manual for Employment Center and SIL Operators**
 

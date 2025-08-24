@@ -1,3 +1,452 @@
+# API Reference — Disability Job Matching System
+_Last updated: 2025-08-23 23:44_
+
+<p align="center">
+  <img src="https://img.shields.io/badge/status-active-success" />
+  <img src="https://img.shields.io/badge/language-EN-blue" />
+  <img src="https://img.shields.io/badge/federated-learning-purple" />
+  <img src="https://img.shields.io/badge/privacy-DP%20%2B%20Shamir-teal" />
+  <img src="https://img.shields.io/badge/blockchain-anchoring-orange" />
+</p>
+
+This document defines the **public API surface** of the Disability Job Matching System.  
+It covers configuration schema, module-level functions and classes, CLI entry points, data contracts, and operational behaviors.  
+The reference applies to the repository layout:
+
+```
+Disability Job Matching System/
+├── README.md, README_IT.md
+├── config.yaml, requirements.txt, streamlit_app.py
+├── data/{raw, processed}
+├── scripts/{01..10}_*.py, blockchain_data_anchoring.py
+├── utils/{feature_engineering.py, scoring.py, parallel_training.py, visualization.py,
+           enhanced_shamir_privacy.py, federated_learning.py, federated_data_splitter.py}
+├── results/, results_LightGBM_federated/, results_mlp_federated/, results_mlp_federated_privacy/
+└── results_blockchain_demo/, visualizations_federated_comparison/, docs/
+```
+
+**Scope & Conventions**
+- Python ≥ 3.10. Static types are descriptive; runtime enforcement is best-effort.
+- File paths are relative to repo root unless noted.
+- All examples assume an activated virtual environment and a populated `config.yaml`.
+- The Streamlit UI uses these APIs indirectly; this reference targets developers and integrators.
+
+
+## Table of Contents
+1. [Versioning & Stability](#versioning--stability)
+2. [Configuration Schema](#configuration-schema)
+3. [Data Contracts](#data-contracts)
+4. [Modules](#modules)
+   - [utils.feature_engineering](#utilsfeature_engineering)
+   - [utils.scoring](#utilsscoring)
+   - [utils.parallel_training](#utilsparallel_training)
+   - [utils.visualization](#utilsvisualization)
+   - [utils.federated_data_splitter](#utilsfederated_data_splitter)
+   - [utils.federated_learning](#utilsfederated_learning)
+   - [utils.enhanced_shamir_privacy](#utilsenhanced_shamir_privacy)
+   - [blockchain_data_anchoring](#blockchain_data_anchoring)
+5. [CLI & Scripts](#cli--scripts)
+6. [Streamlit Integration](#streamlit-integration)
+7. [Errors & Exceptions](#errors--exceptions)
+8. [Performance Notes](#performance-notes)
+9. [Security & Privacy Notes](#security--privacy-notes)
+10. [Backward Compatibility](#backward-compatibility)
+11. [Changelog (API surface)](#changelog-api-surface)
+12. [Appendix A — Legacy API Reference](#appendix-a--legacy-api-reference)
+
+
+## Versioning & Stability
+
+- **Semantic intent**: Changes that break function signatures, parameter semantics, or return types will be noted in the changelog.
+- **Public API**: Only the items documented here are considered stable. Undocumented helpers may change without notice.
+- **Config schema**: Backward-compatible additions (new optional keys) are allowed; removals or type changes are breaking.
+
+
+## Configuration Schema
+
+`config.yaml` keys and types. Values shown are recommended defaults.
+
+```yaml
+seed: 42                          # int — global PRNG seed
+paths:
+  raw_candidates: data/raw/Dataset_Candidati_Aggiornato.csv
+  raw_companies:  data/raw/Dataset_Aziende_con_Stima_Assunzioni.csv
+  processed_dir:  data/processed
+  training_csv:   data/processed/Enhanced_Training_Dataset.csv
+  results_dir:    results
+ui:
+  distance_max_km: 30             # int — default search radius in UI
+training:
+  model_set: ["LightGBM_Optimized", "MLP"]  # list[str]
+  optuna_trials: 50               # int ≥ 1
+  calibration: "sigmoid"          # "sigmoid" | "isotonic"
+federated:
+  rounds: 10                      # int ≥ 1
+  min_clients: 3                  # int ≥ 1
+  aggregator: "fedavg"            # "fedavg" | "trimmed_mean" | "coordinate_median"
+  batch_size: 256                 # int ≥ 1
+privacy:
+  enabled: true                   # bool
+  dp:
+    epsilon: 1.0                  # float > 0
+    delta: 1e-6                   # float in (0, 1)
+    max_grad_norm: 1.0            # float > 0
+    accountant: "rdp"             # "rdp"
+  secure_agg:
+    scheme: "shamir"              # "shamir"
+    threshold: "3-of-5"           # string "t-of-n" (t ≤ n)
+    dropout_recovery: true        # bool
+anchoring:
+  enabled: true                   # bool
+  backend: "merkle"               # "merkle"
+  anchor_every_n: 1               # int ≥ 1
+```
+
+**Notes**
+- Paths must exist prior to execution; writers will create intermediate directories when possible.
+- `distance_max_km` is **30** by default (not 40).
+- DP parameters define the per-experiment privacy budget; log outputs should include final ε, δ.
+
+
+## Data Contracts
+
+### Raw Inputs
+- **Candidates** — `Dataset_Candidati_Aggiornato.csv`
+- **Companies**  — `Dataset_Aziende_con_Stima_Assunzioni.csv`
+
+Columns are institution-specific; keep naming consistent across regions and versions.
+
+### Processed Artifacts
+- **Extended Candidates** — `Dataset_Candidati_Aggiornato_Extended.csv`
+- **Extended Companies**  — `Dataset_Aziende_con_Stima_Assunzioni_Extended.csv`
+- **Training Table (canonical)** — `Enhanced_Training_Dataset.csv`
+
+**Merged Model Summary**
+- `results/merged_model_summary.csv` — consolidated metrics across runs/models.
+
+
+## Modules
+Public classes and functions exported by each module. Helper functions not listed are internal.
+
+> Import style:
+```python
+from utils.feature_engineering import build_training_table
+from utils.scoring import compute_match_score
+from utils.federated_learning import FederatedTrainer, Aggregator
+from utils.enhanced_shamir_privacy import ShamirShares, dp_clip_and_noise, RDPAccountant
+```
+
+
+### utils.feature_engineering
+
+**Purpose**: Data preparation, extension, and canonical training table generation.
+
+#### Public API
+
+```python
+def load_raw_candidates(path: str) -> "pd.DataFrame"
+def load_raw_companies(path: str) -> "pd.DataFrame"
+
+def extend_candidates(df: "pd.DataFrame") -> "pd.DataFrame"
+def extend_companies(df: "pd.DataFrame") -> "pd.DataFrame"
+
+def build_training_table(
+    candidates: "pd.DataFrame",
+    companies: "pd.DataFrame",
+    *,
+    align_schema: bool = True,
+    drop_na_threshold: float = 0.8
+) -> "pd.DataFrame"
+```
+
+**Behavior**
+- `extend_*` may add derived columns (geo-coordinates, readiness indicators).
+- `build_training_table` aligns schemas, resolves categorical encodings, and outputs `Enhanced_Training_Dataset.csv`.
+
+**Examples**
+```python
+cand = load_raw_candidates("data/raw/Dataset_Candidati_Aggiornato.csv")
+comp = load_raw_companies("data/raw/Dataset_Aziende_con_Stima_Assunzioni.csv")
+train_df = build_training_table(extend_candidates(cand), extend_companies(comp))
+train_df.to_csv("data/processed/Enhanced_Training_Dataset.csv", index=False)
+```
+
+
+### utils.scoring
+
+**Purpose**: Matching score and utilities.
+
+#### Public API
+
+```python
+from typing import TypedDict
+
+class ScoreBreakdown(TypedDict):
+    compatibility: float  # [0,1]
+    distance_penalty: float  # [0,1]
+    readiness: float  # [0,1]
+    total: float  # [0,1]
+
+def compute_match_score(
+    candidate: "pd.Series",
+    job: "pd.Series",
+    *,
+    w_compat: float = 0.4,
+    w_distance: float = 0.2,
+    w_readiness: float = 0.4,
+    distance_max_km: int = 30
+) -> ScoreBreakdown
+```
+
+**Notes**
+- Total score is a convex combination of normalized sub-scores.
+- Distance penalty saturates beyond `distance_max_km`.
+
+**Example**
+```python
+s = compute_match_score(c_row, j_row, distance_max_km=30)
+print(s["total"], s)
+```
+
+
+### utils.parallel_training
+
+**Purpose**: Multi-threaded training and model orchestration.
+
+#### Public API
+```python
+def train_centralized_models(
+    train_csv: str,
+    *,
+    models: list[str],
+    optuna_trials: int = 50,
+    calibration: str = "sigmoid",
+    seed: int = 42,
+    out_dir: str = "results"
+) -> dict
+```
+
+**Behavior**
+- Loads `Enhanced_Training_Dataset.csv`, splits data, tunes models, persists `*.joblib` and metrics.
+- Returns a dictionary with per-model metrics.
+
+**Example**
+```python
+train_centralized_models(
+    "data/processed/Enhanced_Training_Dataset.csv",
+    models=["LightGBM_Optimized", "MLP"],
+    out_dir="results"
+)
+```
+
+
+### utils.visualization
+
+**Purpose**: Reusable charts for datasets and experiments.
+
+#### Public API
+```python
+def plot_learning_curves(history: "pd.DataFrame", out_dir: str) -> str
+def plot_confusion(y_true: "np.ndarray", y_pred: "np.ndarray", out_path: str) -> str
+def compare_federated_runs(summary_csv: str, out_dir: str) -> str
+```
+
+**Notes**
+- Outputs PNGs under `results/learning_curves/` or a provided directory.
+
+
+### utils.federated_data_splitter
+
+**Purpose**: Discover and prepare regional datasets for FL.
+
+#### Public API
+```python
+def discover_regional_csvs(root: str = "data/federated") -> list[str]
+def stratified_split_by_region(df: "pd.DataFrame", *, test_size: float = 0.2, seed: int = 42) -> dict[str, "pd.DataFrame"]
+```
+
+
+### utils.federated_learning
+
+**Purpose**: Federated orchestration with robust aggregators.
+
+#### Public Types
+```python
+from enum import Enum
+class Aggregator(str, Enum):
+    fedavg = "fedavg"
+    trimmed_mean = "trimmed_mean"
+    coordinate_median = "coordinate_median"
+```
+
+#### Public API
+```python
+class FederatedTrainer:
+    def __init__(
+        self,
+        clients: list["pd.DataFrame"] | list[str],  # dataframes or CSV paths
+        model: str = "MLP",
+        aggregator: Aggregator = Aggregator.fedavg,
+        rounds: int = 10,
+        batch_size: int = 256,
+        seed: int = 42
+    ): ...
+
+    def run(self) -> dict:
+        'Runs FL rounds; returns metrics summary.'
+
+    def evaluate_global(self) -> dict:
+        'Evaluates the aggregated model on a holdout set.'
+
+    def save(self, out_dir: str) -> None:
+        'Saves global model and metadata.'
+```
+
+**Notes**
+- Deterministic seeding across rounds.
+- Robust aggregators mitigate outliers or partial participation.
+
+
+### utils.enhanced_shamir_privacy
+
+**Purpose**: Secure aggregation (Shamir) and Differential Privacy helpers.
+
+#### Public API
+```python
+class ShamirShares:
+    def __init__(self, threshold: str = "3-of-5", seed: int = 42): ...
+    def split(self, secret: "np.ndarray") -> list["np.ndarray"]
+    def reconstruct(self, shares: list["np.ndarray"]) -> "np.ndarray"
+
+def mask_updates(
+    update: "np.ndarray",
+    *,
+    threshold: str = "3-of-5",
+    seed: int = 42
+) -> tuple["np.ndarray", dict]:
+    'Applies pairwise masks derived from secret shares; returns masked update and metadata.'
+
+def dp_clip_and_noise(
+    grads: "np.ndarray",
+    *,
+    max_grad_norm: float,
+    epsilon: float,
+    delta: float,
+    accountant: str = "rdp",
+    seed: int = 42
+) -> "np.ndarray"
+
+class RDPAccountant:
+    def __init__(self, delta: float): ...
+    def compose(self, epsilons: list[float]) -> float
+```
+
+**Notes**
+- Clip first, then single application of Gaussian noise per gradient tensor.
+- RDP accountant composes per-round privacy losses.
+
+
+### blockchain_data_anchoring
+
+**Purpose**: Merkle commitments for results and models; proof utilities.
+
+#### Public API
+```python
+class MerkleTree:
+    def __init__(self, leaves: list[bytes]): ...
+    def root(self) -> bytes
+    def proof(self, index: int) -> list[tuple[bytes, str]]  # (sibling, 'L'|'R')
+
+def build_manifest(paths: list[str]) -> dict
+def commit_manifest(manifest: dict) -> tuple[bytes, "MerkleTree"]
+def verify_inclusion(root: bytes, leaf: bytes, proof: list[tuple[bytes, str]]) -> bool
+```
+
+**Notes**
+- Deterministic hashing; byte-order documented in code comments.
+
+
+## CLI & Scripts
+
+Each script exposes an argparse-based CLI. Run with `-h` to inspect all options. Typical usage:
+
+```bash
+# Data extension & visualization
+python scripts/01_generate_dataset.py --config config.yaml
+python scripts/02_visualize_dataset.py --config config.yaml
+
+# Centralized training & analysis
+python scripts/03_train_models.py --config config.yaml --models LightGBM_Optimized MLP
+python scripts/04_analyze_results.py --input results/merged_model_summary.csv --out results/
+
+# Federated pipelines
+python scripts/05_LightGBM_federated_training.py --rounds 10 --aggregator fedavg
+python scripts/06_LightGBM_federated_visualization.py --input results_LightGBM_federated/
+
+python scripts/07_mlp_federated_training.py --rounds 10 --batch-size 256 --aggregator trimmed_mean
+python scripts/08_mlp_federated_privacy.py --dp.epsilon 1.0 --dp.delta 1e-6 --secure_agg.threshold 3-of-5
+python scripts/09_mlp_federated_privacy_visualization.py --input results_mlp_federated_privacy/
+
+# Anchoring & benchmarks
+python scripts/blockchain_data_anchoring.py --manifest results/
+python scripts/10_blockchain_anchoring_bench.py --scale 10000
+```
+
+**Exit codes**
+- `0` — success; artifacts written.
+- `1` — misconfiguration (path/schema/args).
+- `2` — runtime error (training, FL round, or plotting failure).
+
+
+## Streamlit Integration
+
+The UI is a thin layer on top of the API:
+- Loads configuration and datasets.
+- Calls scoring functions to present ranked matches.
+- Optionally visualizes FL vs centralized results and privacy budgets.
+
+**Health endpoint**: `/_stcore/health` (ensure `curl` in Docker for health checks).
+
+
+## Errors & Exceptions
+
+Common exception types surfaced by the public API:
+- `FileNotFoundError` — missing paths in `paths.*`.
+- `ValueError` — invalid schema, empty datasets, or parameter bounds.
+- `RuntimeError` — training/FL loop errors, DP accountant inconsistencies.
+- `AssertionError` — internal invariant checks (e.g., shape alignment).
+
+
+## Performance Notes
+
+- Use `trimmed_mean` or `coordinate_median` for robustness with volatile clients.
+- Smaller `batch_size` improves stability on CPU-only nodes.
+- Cache extended datasets under `data/processed/` to cut preprocessing time.
+
+
+## Security & Privacy Notes
+
+- No raw data leaves regional nodes under FL; only model deltas are exchanged.
+- Secure aggregation masks per-parameter updates; DP ensures bounded leakage.
+- Anchoring provides integrity and non-repudiation for published artifacts.
+
+
+## Backward Compatibility
+
+- New optional config keys are backward-compatible.
+- Deprecated options remain for at least one minor cycle with warnings.
+
+
+## Changelog (API surface)
+
+- **v2**: Added federated modules, privacy helpers (Shamir + DP), and anchoring API.
+- **v1**: Initial centralized training and scoring APIs.
+
+
+## Appendix A — Legacy API Reference
+
+> The following section preserves the prior API reference for completeness.
+
 # 📚 API Reference - Disability Job Matching System
 
 **Complete Code Documentation for Developers and Researchers**

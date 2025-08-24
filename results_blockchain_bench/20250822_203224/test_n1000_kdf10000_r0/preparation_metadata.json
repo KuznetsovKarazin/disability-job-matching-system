@@ -1,0 +1,36 @@
+{
+  "total_records": 1000,
+  "fields_used": [
+    "user_id",
+    "region",
+    "skill_level",
+    "target_role",
+    "disability_type",
+    "work_availability",
+    "updated_at"
+  ],
+  "canonical_schema": {
+    "fields": [
+      "user_id",
+      "region",
+      "skill_level",
+      "target_role",
+      "disability_type",
+      "work_availability",
+      "updated_at"
+    ],
+    "schema_version": "1.0",
+    "numeric_precision": 6,
+    "date_format": "iso",
+    "sort_keys": true,
+    "separators": [
+      ",",
+      ":"
+    ]
+  },
+  "region_filter": "Verona",
+  "limit_applied": null,
+  "source_file": "results_blockchain_bench\\20250822_203224\\test_n1000_kdf10000_r0\\test_data.csv",
+  "timestamp": "2025-08-22T18:32:43.716787+00:00",
+  "preparation_time_seconds": 0.18624591827392578
+}

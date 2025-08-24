@@ -9,35 +9,120 @@ env/
 .venv/
 .env
 
-# Data files (exclude large datasets)
-data/processed/Enhanced_Training_Dataset.csv
-*.csv
+# Machine Learning models (too large for git)
+*.joblib
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.pth
+*.pt
+*.onnx
+*.pb
+*.tflite
+*.caffemodel
+*.ckpt
+*.model
+*.weights
 
-# Models (too large for git)
-results/*.joblib
-results/*.pkl
+# Results and model directories
+results/
+results_*/
+results_LightGBM_federated/
+centralized_models/
+federated_models/
+models/
+checkpoints/
+saved_models/
+trained_models/
+
+# Data files (keep only necessary ones)
+data/processed/*.csv
+data/raw/*.csv
+# Uncomment if you want to track specific important files:
+# !data/processed/schema.csv
+# !data/processed/sample.csv
+
+# Large datasets
+*.parquet
+*.feather
+*.hdf
+*.h5
+*.npy
+*.npz
 
 # Logs
 logs/
 *.log
+*.out
+*.err
 
 # Cache files
 *.cache
 data/processed/geocoding_cache.json
+.cache/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-*
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
+*.lnk
 
 # Jupyter
 .ipynb_checkpoints/
+*.ipynb_checkpoints
 
 # Temporary files
 *.tmp
 *.temp
+*.bak
+*.backup
+*~
+.~*
+
+# Python egg files
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+
+# Tensorboard
+.tensorboard/
+tensorboard_logs/
+
+# MLflow
+mlruns/
+mlflow.db
+
+# DVC
+.dvc/
+.dvcignore
+
+# Wandb
+wandb/
+
+# Neptune
+.neptune/
+
+# Configs with secrets (if any)
+config/secrets.yaml
+config/credentials.json
+*.secret

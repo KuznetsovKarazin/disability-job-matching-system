@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "user_id": "U000002",
+  "period_id": 1,
+  "index": 1,
+  "proof": [
+    "136516c1a3bcbcf704f71665fba793db95eb0cd3bb75056e072148dfb2a473f5",
+    "4228f9e55b85fc930e6cc1788fb9bdd384a9a37a61047288e3a89ee035356193"
+  ],
+  "root_hash": "0b1b1cd8875d0e1b522b9562c23533c5d567e8fe640be797eed7ea7dac0794c9",
+  "root_tx": null,
+  "user_salt_server": "53c99c65c8e1000e0002a8bef4b7394af9838cfc383475e43693e935ab39fe21",
+  "kdf_params": {
+    "algorithm": "pbkdf2_sha256",
+    "iterations": 10000,
+    "dklen": 32,
+    "salt_length": 32
+  },
+  "hash_algorithm": "sha256",
+  "canonical_schema": {
+    "fields": [
+      "user_id",
+      "region",
+      "skill_level",
+      "target_role",
+      "disability_type",
+      "work_availability",
+      "updated_at"
+    ],
+    "schema_version": "1.0",
+    "numeric_precision": 6,
+    "date_format": "iso",
+    "sort_keys": true,
+    "separators": [
+      ",",
+      ":"
+    ]
+  },
+  "timestamp": "2025-08-22T18:03:24.582765+00:00",
+  "contract_address": null,
+  "verification_mode": null
+}

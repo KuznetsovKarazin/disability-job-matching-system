@@ -1,0 +1,36 @@
+{
+  "total_records": 3,
+  "fields_used": [
+    "user_id",
+    "region",
+    "skill_level",
+    "target_role",
+    "disability_type",
+    "work_availability",
+    "updated_at"
+  ],
+  "canonical_schema": {
+    "fields": [
+      "user_id",
+      "region",
+      "skill_level",
+      "target_role",
+      "disability_type",
+      "work_availability",
+      "updated_at"
+    ],
+    "schema_version": "1.0",
+    "numeric_precision": 6,
+    "date_format": "iso",
+    "sort_keys": true,
+    "separators": [
+      ",",
+      ":"
+    ]
+  },
+  "region_filter": null,
+  "limit_applied": 3,
+  "source_file": "data/test_blockchain_data.csv",
+  "timestamp": "2025-08-22T17:58:19.512513+00:00",
+  "preparation_time_seconds": 0.006893634796142578
+}

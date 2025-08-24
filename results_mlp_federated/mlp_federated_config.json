@@ -1,0 +1,62 @@
+{
+  "mlp_config": {
+    "hidden_layer_sizes": [
+      128,
+      64
+    ],
+    "activation": "relu",
+    "solver": "sgd",
+    "alpha": 0.01,
+    "batch_size": 256,
+    "learning_rate": "adaptive",
+    "learning_rate_init": 0.001,
+    "momentum": 0.9,
+    "nesterovs_momentum": true,
+    "max_iter": 100,
+    "early_stopping": false,
+    "random_state": 42
+  },
+  "federated_config": {
+    "num_rounds": 30,
+    "local_epochs": 5,
+    "local_batch_size": 256,
+    "validation_split": 0.15,
+    "early_stopping_patience": 3,
+    "validation_check_frequency": 2,
+    "aggregation_method": "fedavg",
+    "trimmed_mean_ratio": 0.1,
+    "seed": 42
+  },
+  "experiment_timestamp": "2025-08-21 18:21:47",
+  "critical_fixes_implemented": {
+    "deterministic_seeding": "SHA256-based seeds for true reproducibility",
+    "proper_fillna_order": "Only global medians, no zero pollution",
+    "correct_region_weight_logging": "Proper alignment of regions and weights",
+    "truly_balanced_warmup": "Uses minimum class count for true balance",
+    "weighted_roc_auc_nan_handling": "Re-normalizes weights for non-NaN values",
+    "deterministic_template_selection": "Alphabetically first region for template"
+  },
+  "production_optimizations": {
+    "safe_parameter_handling": "Only modify coefs_/intercepts_, no internal attributes",
+    "proper_batch_processing": "Complete batch coverage with epoch shuffling",
+    "multiple_aggregation_methods": [
+      "fedavg",
+      "fedavg_equal",
+      "coordinate_median",
+      "trimmed_mean"
+    ],
+    "robust_preprocessing": "Graceful column handling and consistent imputation",
+    "smote_fallback": "RandomOverSampler fallback for edge cases",
+    "enhanced_error_handling": "Safe metrics calculation with zero_division guards",
+    "auto_discovery": "Automatic region detection from filesystem",
+    "weighted_metrics": "Both unweighted and weighted averages",
+    "sgd_optimization": "Explicit momentum and Nesterov acceleration",
+    "oversampling_logging": "Track minority ratios before/after oversampling"
+  },
+  "global_preprocessor_info": {
+    "n_features_selected": 32,
+    "feature_columns_count": 32,
+    "has_global_medians": true,
+    "methodology_note": "Global preprocessor uses centralized statistics (acceptable for simulation)"
+  }
+}

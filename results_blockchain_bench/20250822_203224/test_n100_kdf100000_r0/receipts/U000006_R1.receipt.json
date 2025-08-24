@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "user_id": "U000006_R1",
+  "period_id": 1,
+  "index": 13,
+  "proof": [
+    "af35b4aeb0694af3096f797d942feee0b11dd371fd75155cff4fa446bd13cae2",
+    "29792445ce40760e4874c28492a142433ecb01d38828cef70cddf09600f28856",
+    "e07a1c05febce5939d0f74fa057768a5ecf104e73308c8280cf49d9451a8cccd",
+    "ad915eb399acd6d531662248bef2278acfa703ee1fef49f2362078dd96644a98",
+    "55dfc2cdd929b6ed3d2d3e0cc59c80da570b9653866ab14cbed78656d11c0528",
+    "722750d9f05006691f9c54b2e9bcfa2c77f99df5f3d03d4038c4aa59d41fca31",
+    "16eb9bf290a22f2583a5c40b23c744a095702f1852c1a526e37e8a3b286c465a"
+  ],
+  "root_hash": "e74b813fb2e25b877bb558edd519985fc919a9249692b8671d15dfcd3862c63f",
+  "root_tx": null,
+  "user_salt_server": "6e22fe1e201c26d98b675d22276253fa887c2eaeb2df76e6ca58a8de82c47add",
+  "kdf_params": {
+    "algorithm": "pbkdf2_sha256",
+    "iterations": 100000,
+    "dklen": 32,
+    "salt_length": 32
+  },
+  "hash_algorithm": "sha256",
+  "canonical_schema": {
+    "fields": [
+      "user_id",
+      "region",
+      "skill_level",
+      "target_role",
+      "disability_type",
+      "work_availability",
+      "updated_at"
+    ],
+    "schema_version": "1.0",
+    "numeric_precision": 6,
+    "date_format": "iso",
+    "sort_keys": true,
+    "separators": [
+      ",",
+      ":"
+    ]
+  },
+  "timestamp": "2025-08-22T19:12:56.391188+00:00",
+  "contract_address": null,
+  "verification_mode": null
+}

@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "user_id": "U000001_R189",
+  "period_id": 1,
+  "index": 300,
+  "proof": [
+    "e9103454115b2be782968df85ee0547b848f2984b811278a472f13fc338cc67e",
+    "5848abb9059cb42efc9b4e652cf1ca64a55b2d160b3527468e1e216716fcf056",
+    "b9403954011301cb9322726934e393d44f4e434e90a5a2c9b10eb52476c28b12",
+    "e0d8f734337624a45a859675e8fee2dd3faa8dc665eef5c0213ea63508669486",
+    "7a8f70ec2e15e2a328eb06980a4df796e3013182bebf68f563a451f68663ff1b",
+    "8dc1ddea8f781ded762311a04d260cbf4024ef4d421fb6f451e6d42f3251a622",
+    "1b59076892f99a533c30830f12bb15cef3f43a59d881af7b079fa7d7fbcd0407",
+    "440e01af09459d778863648e10236c0899ad7e67ea4a3bd78b6985089443965c",
+    "47ba5210e18f461ea2f3640c1c668abf0882e067a9750bbb2e4a5778c8aa5086",
+    "f07662a5d8b700347f1b70607d66fb5aa6d79823ef1789dac15af9536f93ebe7",
+    "9c6c2bbe5644ebd1551fde5cf313a416a426f8b89505c8e744a5cd1136b8738d",
+    "3a2daf0bab43be32f114297582645313acb6f80b4ebe4b88f36173304a9fcb64",
+    "7366e471a4861357ed6d6c4252c7ee2f3bb101fb1275ec4041c4243eb9fde63a",
+    "6f8a95780b14e84af70def8c45c2c4d4cae9767c4ec2f08a409dd7090af4ca20"
+  ],
+  "root_hash": "07396da1e8cfcbcb51a3e5346c719e45bdaa80b33726e44420463fecd1073bbe",
+  "root_tx": null,
+  "user_salt_server": "a39b7f93fbcff990299463866b23ac77e6a1aa2327e2e145d1a9ca052b0825c6",
+  "kdf_params": {
+    "algorithm": "pbkdf2_sha256",
+    "iterations": 100000,
+    "dklen": 32,
+    "salt_length": 32
+  },
+  "hash_algorithm": "sha256",
+  "canonical_schema": {
+    "fields": [
+      "user_id",
+      "region",
+      "skill_level",
+      "target_role",
+      "disability_type",
+      "work_availability",
+      "updated_at"
+    ],
+    "schema_version": "1.0",
+    "numeric_precision": 6,
+    "date_format": "iso",
+    "sort_keys": true,
+    "separators": [
+      ",",
+      ":"
+    ]
+  },
+  "timestamp": "2025-08-22T19:12:30.882149+00:00",
+  "contract_address": null,
+  "verification_mode": null
+}

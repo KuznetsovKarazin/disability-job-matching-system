@@ -1,4 +1,363 @@
-# 🎯 Guida Utente - Sistema di Raccomandazione per Collocamento Mirato
+# Guida Utente — Sistema di Collocamento Mirato
+_Ultimo aggiornamento: 2025-08-24 09:37_
+
+> Guida per **operatori** (CPI/SIL), **analisti** e **sviluppatori**.
+> Copre workflow, UI, preparazione dataset, apprendimento federato, privacy,
+> anchoring, troubleshooting e best practice.
+
+**Documenti correlati**: `README_IT.md`, `technical_documentation.md`, `deployment_guide.md`, `api_reference.md`.
+
+
+## Indice
+1. Introduzione
+2. Tour dell'Interfaccia
+3. Preparazione Dati & Contratti
+4. Esecuzione del Sistema
+5. Workflow di Apprendimento Federato
+6. Privacy & Sicurezza (vista operatore)
+7. Anchoring stile Blockchain (vista operatore)
+8. Risultati, Report & Visualizzazioni
+9. Troubleshooting
+10. FAQ
+11. Glossario
+12. Supporto & Contatti
+13. Appendice A — Riferimenti CLI
+14. Appendice B — Riferimento `config.yaml`
+15. Appendice C — Mappa delle Cartelle Risultati
+16. Appendice D — Guida Precedente (testo integrale)
+
+## 1. Introduzione
+
+Il Sistema di Collocamento Mirato supporta CPI/SIL nell’abbinare candidati e posizioni inclusive.
+Supporta training **centralizzato** e **federato**, include funzioni **privacy‑preserving** e **anchoring** per l’integrità.
+
+**Concetti chiave**
+- Training centralizzato con `data/processed/Enhanced_Training_Dataset.csv`.
+- FL tra regioni senza condividere dati grezzi.
+- Modalità privacy: secure aggregation (Shamir) e Privacy Differenziale (RDP).
+- Anchoring: commit Merkle + prove.
+
+**Ruoli**
+- Operatore: avvia match, rivede raccomandazioni, genera report.
+- Analista: valida dataset, monitora metriche, confronta modelli.
+- Sviluppatore: mantiene pipeline, ottimizza modelli, configura deployment.
+
+## 2. Tour dell'Interfaccia
+
+Avvio:
+```bash
+streamlit run streamlit_app.py
+```
+
+**Home**
+- KPI (candidati, aziende, regioni) e link rapidi.
+
+**Matching**
+- Input: raggio (default 30 km), filtri; Output: ranking (compatibilità, distanza, readiness).
+- Export: CSV/PNG.
+
+**Confronto Modelli**
+- Centralizzato vs Regionale vs Federato; F1/ROC‑AUC; calibrazione; matrici.
+
+**Privacy**
+- Attiva/disattiva; (ε, δ) per round; stato secure aggregation.
+
+**Integrità**
+- Ultimo anchoring, prove e verifica; avvio di un nuovo anchoring.
+
+## 3. Preparazione Dati & Contratti
+
+**Raw (`data/raw/`)**
+- Dataset_Candidati_Aggiornato.csv
+- Dataset_Aziende_con_Stima_Assunzioni.csv
+
+**Processed (`data/processed/`)**
+- Dataset_Candidati_Aggiornato_Extended.csv
+- Dataset_Aziende_con_Stima_Assunzioni_Extended.csv
+- Enhanced_Training_Dataset.csv  # tabella canonica
+
+Raccomandazioni:
+- Schemi coerenti tra regioni.
+- Documentare cambi in `SCHEMA.md`; aggiornare `01_generate_dataset.py`.
+- Validare geocodifica; allineare `ui.distance_max_km` (30 km).
+
+## 4. Esecuzione del Sistema
+
+**Centralizzato**
+```bash
+python scripts/03_train_models.py --config config.yaml
+python scripts/04_analyze_results.py
+```
+
+**LightGBM Federato (regionale → ensemble)**
+```bash
+python scripts/05_LightGBM_federated_training.py
+python scripts/06_LightGBM_federated_visualization.py
+```
+
+**MLP Federato (standard + privacy)**
+```bash
+python scripts/07_mlp_federated_training.py --aggregator fedavg
+python scripts/08_mlp_federated_privacy.py --dp.epsilon 1.0 --secure_agg.threshold 3-of-5
+python scripts/09_mlp_federated_privacy_visualization.py
+```
+
+**Anchoring**
+```bash
+python scripts/blockchain_data_anchoring.py
+python scripts/10_blockchain_anchoring_bench.py
+```
+
+## 5. Workflow di Apprendimento Federato
+
+### 5.1 LightGBM (ensemble regionale)
+- Modelli per regione; ensemble pesato (peso ∝ campioni).
+```bash
+python scripts/05_LightGBM_federated_training.py
+python scripts/06_LightGBM_federated_visualization.py
+```
+
+### 5.2 MLP (vero FedAvg)
+**Aggregatore: fedavg**
+```bash
+python scripts/07_mlp_federated_training.py --aggregator fedavg --rounds 10 --batch_size 256
+```
+**Aggregatore: trimmed_mean**
+```bash
+python scripts/07_mlp_federated_training.py --aggregator trimmed_mean --rounds 10 --batch_size 256
+```
+**Aggregatore: coordinate_median**
+```bash
+python scripts/07_mlp_federated_training.py --aggregator coordinate_median --rounds 10 --batch_size 256
+```
+
+### 5.3 FL con Privacy (Shamir + DP)
+**DP ε=0.5, δ=1e-6 (RDP)**
+```bash
+python scripts/08_mlp_federated_privacy.py --dp.epsilon 0.5 --dp.delta 1e-6 --secure_agg.threshold 3-of-5
+```
+**DP ε=1.0, δ=1e-6 (RDP)**
+```bash
+python scripts/08_mlp_federated_privacy.py --dp.epsilon 1.0 --dp.delta 1e-6 --secure_agg.threshold 3-of-5
+```
+**DP ε=2.0, δ=1e-6 (RDP)**
+```bash
+python scripts/08_mlp_federated_privacy.py --dp.epsilon 2.0 --dp.delta 1e-6 --secure_agg.threshold 3-of-5
+```
+
+## 6. Privacy & Sicurezza (vista operatore)
+
+**Secure Aggregation**
+- Shamir (es. 3‑of‑5), mascheramento per‑parametro, recupero dropout.
+- Semi deterministici per riproducibilità.
+
+**Privacy Differenziale**
+- Clipping per round e singola iniezione di rumore gaussiano.
+- Accounting RDP di (ε, δ) cumulativi.
+
+**Checklist**
+- I dati grezzi non lasciano i nodi regionali.
+- Proteggere `results_mlp_federated_privacy/`.
+- Rotazione accessi a `data/` e `results/`.
+
+## 7. Anchoring stile Blockchain (vista operatore)
+
+**Obiettivo**
+- Prove di integrità (commit Merkle + prove di inclusione) per modelli e report.
+
+**Esecuzione**
+```bash
+python scripts/blockchain_data_anchoring.py
+python scripts/10_blockchain_anchoring_bench.py
+```
+
+**Output**
+- Manifest, prove, log in `results_blockchain_demo/`.
+
+## 8. Risultati, Report & Visualizzazioni
+
+- `results/`: artefatti centralizzati (`*.joblib`), `learning_curves/`, `*.png`, `merged_model_summary.csv`.
+- `results_LightGBM_federated/`: artefatti LightGBM (regionale/federato/centralizzato) + `complete_model_comparison.csv`.
+- `results_mlp_federated/`, `results_mlp_federated_privacy/`: output MLP FL e log privacy.
+- `visualizations_federated_comparison/`: grafici comparativi.
+- `results_blockchain_demo/`: artefatti di anchoring.
+
+Interpretazione:
+- Usare F1/ROC‑AUC; confrontare Centralizzato vs Regionale vs Federato.
+- Con DP, trade‑off moderato su F1; regolare ε/round/aggregatore.
+
+## 9. Troubleshooting
+
+- Moduli mancanti → `pip install -r requirements.txt`
+- Errore `_safe_tags` di scikit‑learn → versionare con `imbalanced-learn`
+- Health check Docker → includere `curl`, verificare `/_stcore/health`
+- Confronti vuoti → verificare cartelle risultati e path CSV
+
+## 10. FAQ
+
+**Uso senza condivisione dati?** Sì — MLP FL.
+**Raggio predefinito?** 30 km (`config.yaml`).
+**Impatto DP?** Lieve calo F1; regolare ε/round/aggregatore.
+**Integrità nel tempo?** Verifica con prove in `results_blockchain_demo/`.
+**GPU?** Non richieste; adatto a CPU.
+
+## 11. Glossario
+
+CPI/SIL, Apprendimento Federato, Secure Aggregation, Privacy Differenziale (RDP), Albero di Merkle.
+
+## 12. Supporto & Contatti
+
+CPI Villafranca di Verona • SIL Veneto • Università eCampus
+
+## 13. Appendice A — Riferimenti CLI
+### 01_generate_dataset.py
+Opzioni comuni:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Esempio:
+```bash
+python scripts/01_generate_dataset.py --config config.yaml
+```
+### 02_visualize_dataset.py
+Opzioni comuni:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Esempio:
+```bash
+python scripts/02_visualize_dataset.py --config config.yaml
+```
+### 03_train_models.py
+Opzioni comuni:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Esempio:
+```bash
+python scripts/03_train_models.py --config config.yaml
+```
+### 04_analyze_results.py
+Opzioni comuni:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Esempio:
+```bash
+python scripts/04_analyze_results.py --config config.yaml
+```
+### 05_LightGBM_federated_training.py
+Opzioni comuni:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Esempio:
+```bash
+python scripts/05_LightGBM_federated_training.py --config config.yaml
+```
+### 06_LightGBM_federated_visualization.py
+Opzioni comuni:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Esempio:
+```bash
+python scripts/06_LightGBM_federated_visualization.py --config config.yaml
+```
+### 07_mlp_federated_training.py
+Opzioni comuni:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Esempio:
+```bash
+python scripts/07_mlp_federated_training.py --config config.yaml
+```
+### 08_mlp_federated_privacy.py
+Opzioni comuni:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Esempio:
+```bash
+python scripts/08_mlp_federated_privacy.py --config config.yaml
+```
+### 09_mlp_federated_privacy_visualization.py
+Opzioni comuni:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Esempio:
+```bash
+python scripts/09_mlp_federated_privacy_visualization.py --config config.yaml
+```
+### blockchain_data_anchoring.py
+Opzioni comuni:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Esempio:
+```bash
+python scripts/blockchain_data_anchoring.py --config config.yaml
+```
+### 10_blockchain_anchoring_bench.py
+Opzioni comuni:
+```
+--config config.yaml
+--rounds 10
+--batch_size 256
+--aggregator [fedavg|trimmed_mean|coordinate_median]
+```
+Esempio:
+```bash
+python scripts/10_blockchain_anchoring_bench.py --config config.yaml
+```
+
+## 14. Appendice B — Riferimento `config.yaml`
+
+Vedi README per l'esempio completo. Campi chiave: `paths.*`, `ui.distance_max_km`, `training.*`, `federated.*`, `privacy.*`, `anchoring.*`.
+
+## 15. Appendice C — Mappa Cartelle Risultati
+
+- `results/` — modelli e grafici centralizzati
+- `results_LightGBM_federated/` — artefatti federati LightGBM
+- `results_mlp_federated/`, `results_mlp_federated_privacy/` — output federati MLP
+- `results_blockchain_demo/` — anchoring
+- `visualizations_federated_comparison/` — grafici comparativi
+
+## 16. Appendice D — Guida Precedente (testo integrale)
+
+    # 🎯 Guida Utente - Sistema di Raccomandazione per Collocamento Mirato
 
 **Manuale Operativo Completo per Operatori CPI e SIL**
 

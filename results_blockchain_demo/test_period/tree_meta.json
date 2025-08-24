@@ -1,0 +1,52 @@
+{
+  "root_hash": "a9badfcef4eea26e04433328be78c38378af62ceebb90ce9ec66058e75c86d01",
+  "total_leaves": 5,
+  "hash_algorithm": "sha256",
+  "domain_separation": true,
+  "kdf_config": {
+    "algorithm": "pbkdf2_sha256",
+    "iterations": 10000,
+    "dklen": 32,
+    "salt_length": 32
+  },
+  "canonical_schema": {
+    "fields": [
+      "user_id",
+      "region",
+      "skill_level",
+      "target_role",
+      "disability_type",
+      "work_availability",
+      "updated_at"
+    ],
+    "schema_version": "1.0",
+    "numeric_precision": 6,
+    "date_format": "iso",
+    "sort_keys": true,
+    "separators": [
+      ",",
+      ":"
+    ]
+  },
+  "build_timestamp": "2025-08-22T17:36:00.388808+00:00",
+  "build_time_seconds": 0.04008746147155762,
+  "user_indices": {
+    "U000001": 0,
+    "U000002": 1,
+    "U000003": 2,
+    "U000004": 3,
+    "U000005": 4
+  },
+  "schema_version": "1.0",
+  "persistent_files": {
+    "salts": "salts.json",
+    "leaves": "leaves.json",
+    "levels": "levels.json",
+    "schema": "canonical_schema.json"
+  },
+  "performance": {
+    "proof_generation": "O(log n)",
+    "kdf_iterations": 10000,
+    "kdf_strength": "demo"
+  }
+}
