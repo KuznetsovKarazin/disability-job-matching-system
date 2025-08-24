@@ -40,8 +40,8 @@ flowchart TB
   E --> P[Tabella di Training]
   P --> CB[Baseline Centralizzata]
   P --> FL[FL]
-  FL --> SA[Secure Aggregation (Shamir)]
-  SA --> DP[DP (RDP)]
+  FL --> SA["Secure Aggregation (Shamir)"]
+  SA --> DP["DP (RDP)"]
   CB --> A[Artefatti]
   DP --> A
   A --> M[Commit Merkle]
@@ -159,11 +159,9 @@ flowchart TB
 - Risultati FL con privacy con tracciamento ε/δ.
 - Benchmark anchoring con tempi di build/prova/verifica.
 
-### Report incorporati
+# Report incorporati
+
 # COMPREHENSIVE FEDERATED LEARNING ANALYSIS REPORT
-# Disability Employment Matching System
-# Generated: 2025-08-21 20:24:13
-# Author: Claude Sonnet 4
 
 ## EXECUTIVE SUMMARY
 This experiment compares three machine learning approaches for disability employment matching:
@@ -205,7 +203,7 @@ results_federated/
 │   ├── CPI_Padova_complete_model.joblib      # Complete regional model + preprocessing
 │   ├── CPI_Treviso_complete_model.joblib      # Complete regional model + preprocessing
 │   ├── CPI_Venezia_complete_model.joblib      # Complete regional model + preprocessi
-
+```
 # PRODUCTION MLP FEDERATED LEARNING EXPERIMENT SUMMARY
 Generated: 2025-08-21 18:21:47
 
@@ -266,84 +264,6 @@ Status: Federated learning competitive
 
 ## Training Progression
 Aggregation Method: fedavg
-
-Round 1: Unweighted F1=0.
-
-ENHANCED SHAMIR SECRET SHARING - ALL CRITICAL FIXES COMPLETE
-
-
-
-================================================================================
-
-COMPREHENSIVE TEST: Enhanced Privacy-Preserving Shamir (FINAL)
-
-================================================================================
-
-Configuration: 3-of-5
-
-Prime: 2305843009213693951 (61 bits)
-
-DP: ε=1.0, σ\_client=0.0611
-
-
-
-Test 1: Critical Edge Cases (Final)
-
-------------------------------------------------------------
-
-&nbsp;  1: PASS | Orig:   0.000000 | Recon:   0.000000 | Err: 0.00e+00
-
-&nbsp;  2: PASS | Orig:   1.000000 | Recon:   1.000000 | Err: 0.00e+00
-
-&nbsp;  3: PASS | Orig:  -1.000000 | Recon:  -1.000000 | Err: 0.00e+00
-
-&nbsp;  4: PASS | Orig:   3.141590 | Recon:   3.141590 | Err: 0.00e+00
-
-&nbsp;  5: PASS | Orig:  -2.718280 | Recon:  -2.718280 | Err: 0.00e+00
-
-&nbsp;  6: PASS | Orig: 1000.000000 | Recon: 1000.000000 | Err: 0.00e+00
-
-&nbsp;  7: PASS | Orig: -1000.000000 | Recon: -1000.000000 | Err: 0.00e+00
-
-&nbsp;  8: PASS | Orig:   0.001000 | Recon:   0.001000 | Err: 0.00e+00
-
-&nbsp;  9: PASS | Orig:  -0.001000 | Recon:  -0.001000 | Err: 0.00e+00
-
-&nbsp; 10: PASS | Orig:   0.000010 | Recon:   0.000010 | Err: 0.00e+00
-
-&nbsp; 11: PASS | Orig:  -0.000010 | Recon:  -0.000010 | Err: 0.00e+00
-
-&nbsp; 12: PASS | Orig: -12.368791 | Recon: -12.368791 | Err: 2.99e-07
-
-&nbsp; Result: 12/12 passed
-
-
-
-Test 2: Vectorized Operations
-
-------------------------------------------------------------
-
-&nbsp; 1: PASS | Size:    3 | Max Error: 0.00e+00 | Time: 0.000s
-
-&nbsp; 2: PASS | Size:    3 | Max Error: 0.00e+00 | Time: 0.000s
-
-&nbsp; 3: PASS | Size:    3 | Max Error: 0.00e+00 | Time: 0.000s
-
-&nbsp; 4: PASS | Size:   50 | Max Error: 4.97e-07 | Time: 0.001s
-
-&nbsp; 5: PASS | Size:    4 | Max Error: 0.00e+00 | Time: 0.000s
-
-&nbsp; Result: 5/5 passed
-
-
-
-Test 3: FIXED Secure Aggregation (Correct L2 Formula)
-
-------------------------------------------------------------
-
-&nbsp; Secure aggregation completed
-
-&nbsp; Agg
 
 # Blockchain Anchoring Benchmark Results
 Generated: 2025-08-22T22:31:09.960633
