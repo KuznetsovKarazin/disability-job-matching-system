@@ -361,19 +361,3 @@ python scripts/06_LightGBM_federated_visualization.py --input results/federated/
 
 ---
 
-## Performance Notes and Corrections
-
-### Key Corrections Made:
-1. **Fixed inconsistent distance thresholds**: Corrected references to 40km default (should be 30km)
-2. **Clarified federated learning performance**: LightGBM federated slightly underperforms centralized (-0.0005 F1)
-3. **Updated MLP results**: Clarified that centralized MLP achieves F1=0.828, federated achieves F1=0.788
-4. **Removed emoji overuse**: Cleaned up excessive emoji usage while maintaining key visual elements
-5. **Corrected performance claims**: Fixed misleading statements about federated learning outperforming centralized
-6. **Updated blockchain benchmarks**: Included accurate timing and memory usage data
-7. **Clarified privacy costs**: Minimal performance impact with practical DP parameters
-
-### Technical Accuracy:
-- LightGBM federated learning shows minimal performance degradation (-0.06% F1-score)
-- Privacy-preserving federated learning maintains competitive performance with proper DP tuning
-- Blockchain anchoring scales appropriately with O(log n) proof sizes
-- All performance figures now match the experimental results provided
