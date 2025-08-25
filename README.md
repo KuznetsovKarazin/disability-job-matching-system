@@ -172,11 +172,56 @@ flowchart TD
 ```
 
 ## Installation
+
+### System Requirements
+- **Python**: 3.10 or higher (3.11 recommended)
+- **Operating System**: Windows 10+, macOS 10.15+, or Linux
+- **RAM**: 8GB minimum (16GB recommended for training)
+- **Storage**: 3GB free space
+
+### Platform-Specific Installation
+
+1. **Clone the repository**:
 ```bash
 git clone <YOUR_REPO_URL>
 cd <REPO>
-python -m venv venv && source venv/bin/activate  # (Windows: venv\Scripts\activate)
-pip install -r requirements.txt
+```
+
+2. **Create and activate virtual environment:**
+```bash
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# macOS/Linux  
+source venv/bin/activate
+```
+
+3. **Install dependencies (choose based on your platform):**
+For Windows:
+```bash
+pip install -r requirements-windows.txt
+```
+
+For macOS:
+```bash
+pip install -r requirements-macos.txt
+```
+
+For Linux:
+```bash
+pip install -r requirements-base.txt
+```
+
+**Optional: Blockchain Features**
+If you need blockchain anchoring (may cause conflicts):
+```bash
+pip install eth-tester>=0.9.1 web3>=6.0.0
+```
+
+**Verification**
+Test your installation:
+```bash
+python -c "import streamlit, pandas, sklearn, lightgbm; print('Installation successful')"
 ```
 
 ## Configuration

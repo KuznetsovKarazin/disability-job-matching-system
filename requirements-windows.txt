@@ -1,0 +1,7 @@
+# Windows-specific requirements
+# Include base requirements plus Windows-specific packages
+
+-r requirements-base.txt
+
+# Windows-specific packages
+pywin32>=306

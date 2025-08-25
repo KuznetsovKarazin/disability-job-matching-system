@@ -1,0 +1,6 @@
+# macOS-specific requirements
+# Include base requirements (no additional macOS-specific packages needed)
+
+-r requirements-base.txt
+
+# Note: pywin32 is not compatible with macOS - excluded automatically

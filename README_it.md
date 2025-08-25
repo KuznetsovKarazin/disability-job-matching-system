@@ -172,11 +172,56 @@ flowchart TD
 ```
 
 ## Installazione
+
+### Requisiti di Sistema
+- **Python**: 3.10 o superiore (3.11 raccomandato)
+- **Sistema Operativo**: Windows 10+, macOS 10.15+, o Linux
+- **RAM**: 8GB minimo (16GB raccomandato per il training)
+- **Storage**: 3GB spazio libero
+
+### Installazione Specifica per Piattaforma
+
+1. **Clonare il repository**:
 ```bash
 git clone <YOUR_REPO_URL>
 cd <REPO>
-python -m venv venv && source venv/bin/activate  # (Windows: venv\Scripts\activate)
-pip install -r requirements.txt
+```
+
+2. **Creare e attivare ambiente virtuale:**
+```bash
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# macOS/Linux  
+source venv/bin/activate
+```
+
+3. **Installare dipendenze (scegliere in base alla piattaforma):**
+Per Windows:
+```bash
+pip install -r requirements-windows.txt
+```
+Per macOS:
+```bash
+pip install -r requirements-macos.txt
+```
+Per Linux:
+```bash
+pip install -r requirements-base.txt
+```
+
+**Opzionale: Funzionalità Blockchain**
+Se necessarie le funzionalità di anchoring blockchain (può causare conflitti):
+```bash
+pip install eth-tester>=0.9.1 web3>=6.0.0
+```
+
+**Verifica**
+Testare l'installazione:
+```bash
+python -c "import streamlit, pandas, sklearn, lightgbm; print('Installazione completata')"
 ```
 
 ## Configurazione
@@ -342,6 +387,12 @@ python scripts/06_LightGBM_federated_visualization.py --input results/federated/
 - Errori tag sklearn (versioni vecchie) → fissare `scikit-learn` per `requirements.txt`.
 - Assicurarsi che `curl` esista in Docker per controlli salute.
 - **Soglia distanza**: Predefinita 30km potrebbe essere troppo restrittiva per aree rurali.
+
+### Installation Issues
+- **Python Version Error**: Ensure Python 3.10+ (`python --version`)
+- **macOS pywin32 Error**: Normal - this package is Windows-only, ignore the error
+- **Package Conflicts**: Use platform-specific requirements file for your system
+- **Missing Streamlit**: Install with `pip install streamlit>=1.28.0`
 
 ## Conformità (GDPR)
 - Ruoli (controllore/processore) chiariti; template DPIA disponibile.
